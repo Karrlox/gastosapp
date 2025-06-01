@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión FabricandoHogares</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Gestión de Gastos e Ingresos - FabricandoHogares</h1>
+        <nav id="user-nav" style="display: none;">
+            <span id="user-email"></span>
+            <button id="logout-button">Cerrar Sesión</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="auth-section">
+            <div id="login-form">
+                <h2>Iniciar Sesión</h2>
+                <input type="email" id="login-email" placeholder="Correo electrónico" required>
+                <input type="password" id="login-password" placeholder="Contraseña" required>
+                <button id="login-button">Entrar</button>
+                <p>¿No tienes cuenta? <a href="#" id="show-signup">Regístrate</a></p>
+            </div>
+            <div id="signup-form" style="display:none;">
+                <h2>Registrarse</h2>
+                <input type="email" id="signup-email" placeholder="Correo electrónico" required>
+                <input type="password" id="signup-password" placeholder="Contraseña (mín. 6 caracteres)" required>
+                <button id="signup-button">Registrar</button>
+                <p>¿Ya tienes cuenta? <a href="#" id="show-login">Inicia Sesión</a></p>
+            </div>
+        </section>
+
+        <section id="app-section" style="display:none;">
+            <h2>Panel Principal</h2>
+
+            <div class="form-container">
+                <h3>Añadir Nueva Transacción</h3>
+                <select id="transaction-type">
+                    <option value="ingreso">Ingreso</option>
+                    <option value="gasto">Gasto</option>
+                </select>
+                <input type="text" id="transaction-description" placeholder="Descripción">
+                <input type="number" id="transaction-amount" placeholder="Monto (€)">
+                <input type="date" id="transaction-date">
+                <select id="transaction-category">
+                    <option value="momentaneo">Momentáneo</option>
+                    <option value="semanal">Semanal</option>
+                    <option value="mensual">Mensual</option>
+                    <option value="anual">Anual</option>
+                </select>
+                <input type="text" id="transaction-property" placeholder="Inmueble asociado (Opcional)">
+                <button id="add-transaction-button">Añadir Transacción</button>
+            </div>
+
+            <div class="filters-analysis">
+                <h3>Filtros y Análisis</h3>
+                <label for="filter-month">Mes:</label>
+                <input type="month" id="filter-month">
+                <label for="filter-type">Tipo:</label>
+                <select id="filter-type">
+                    <option value="todos">Todos</option>
+                    <option value="ingreso">Ingresos</option>
+                    <option value="gasto">Gastos</option>
+                </select>
+                <button id="apply-filters-button">Aplicar Filtros</button>
+                <div id="summary">
+                    <p>Total Ingresos: <span id="total-ingresos">0.00</span> €</p>
+                    <p>Total Gastos: <span id="total-gastos">0.00</span> €</p>
+                    <p>Balance: <span id="balance">0.00</span> €</p>
+                </div>
+            </div>
+
+            <div class="transactions-list">
+                <h3>Historial de Transacciones</h3>
+                <ul id="transactions-ul">
+                    </ul>
+            </div>
+
+            <div id="alerts-section">
+                <h3>Alertas Pendientes</h3>
+                <ul id="alerts-ul">
+                    </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; <span id="current-year"></span> FabricandoHogares. Todos los derechos reservados.</p>
+    </footer>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js"; // Última versión estable al momento de escribir
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, Timestamp, onSnapshot, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+ 	 apiKey: "AIzaSyCDBg8qM50VpW59IBQ94ZhLceq2sCwf1rc",
+ 	 authDomain: "gastosinmobiliaria.firebaseapp.com",
+	  projectId: "gastosinmobiliaria",
+ 	 storageBucket: "gastosinmobiliaria.firebasestorage.app",
+ 	 messagingSenderId: "690296047200",
+  	appId: "1:690296047200:web:b37efc46d3ae0dfe03e505",
+  	measurementId: "G-GZTXT2VSM5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Exportar para usarlos en otros scripts
+        // Hacemos esto para que estén disponibles globalmente en el scope del módulo
+        window.firebase = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, query, where, getDocs, Timestamp, onSnapshot, orderBy, doc, deleteDoc, updateDoc };
+
+    </script>
+
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/app.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
