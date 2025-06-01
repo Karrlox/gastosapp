@@ -3,128 +3,1496 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión FabricandoHogares</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Gestor de Gastos e Ingresos para Inmobiliaria FabricandoHogares</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        input, select, button, textarea {
+            border-radius: 0.5rem; /* rounded-md */
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* indigo-700 */
+        }
+        .btn-danger {
+            background-color: #ef4444; /* red-500 */
+            color: white;
+            padding: 0.5rem 1rem;
+            font-weight: 500; /* font-medium */
+            transition: background-color 0.2s;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626; /* red-600 */
+        }
+        .btn-secondary {
+            background-color: #6b7280; /* gray-500 */
+            color: white;
+            padding: 0.5rem 1rem;
+            font-weight: 500; /* font-medium */
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; /* gray-600 */
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 600px;
+            text-align: left; /* Changed for forms */
+            position: relative; /* For close button positioning */
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+        }
+        .bar-chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .bar-label {
+            width: 120px; /* Fixed width for labels */
+            text-align: right;
+            font-size: 0.875rem; /* text-sm */
+            flex-shrink: 0;
+        }
+        .bar-fill {
+            background-color: #4f46e5; /* indigo-600 for general bars */
+            height: 20px;
+            border-radius: 0.25rem;
+            transition: width 0.5s ease-in-out;
+        }
+        .bar-value {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            flex-shrink: 0;
+        }
+        .budget-bar-container {
+            width: 100%;
+            background-color: #e5e7eb; /* gray-200 */
+            border-radius: 0.5rem;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .budget-bar-fill {
+            height: 100%;
+            border-radius: 0.5rem;
+            transition: width 0.5s ease-in-out;
+            background-color: #22c55e; /* green-500 */
+        }
+        .budget-bar-fill.over-budget {
+            background-color: #ef4444; /* red-500 */
+        }
+        .budget-text {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .card { padding: 1.5rem; }
+            .bar-label { width: 80px; }
+        }
+    </style>
 </head>
-<body>
-    <header>
-        <h1>Gestión de Gastos e Ingresos - FabricandoHogares</h1>
-        <nav id="user-nav" style="display: none;">
-            <span id="user-email"></span>
-            <button id="logout-button">Cerrar Sesión</button>
-        </nav>
-    </header>
-
-    <main>
-        <section id="auth-section">
-            <div id="login-form">
-                <h2>Iniciar Sesión</h2>
-                <input type="email" id="login-email" placeholder="Correo electrónico" required>
-                <input type="password" id="login-password" placeholder="Contraseña" required>
-                <button id="login-button">Entrar</button>
-                <p>¿No tienes cuenta? <a href="#" id="show-signup">Regístrate</a></p>
+<body class="flex flex-col min-h-screen">
+    <div id="authSection" class="min-h-screen flex items-center justify-center bg-gray-100">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 id="authTitle" class="text-3xl font-bold text-center text-indigo-700 mb-6">Iniciar Sesión</h2>
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label for="authEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="authEmail" placeholder="tu@email.com" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="authPassword" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" id="authPassword" placeholder="********" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="btn-primary w-full">Iniciar Sesión</button>
+            </form>
+            <p id="authMessage" class="text-center text-sm text-red-500 mt-4 hidden"></p>
+            <div class="text-center mt-4">
+                <button id="toggleAuthModeBtn" class="text-indigo-600 hover:text-indigo-800 text-sm">¿No tienes cuenta? Regístrate aquí</button>
             </div>
-            <div id="signup-form" style="display:none;">
-                <h2>Registrarse</h2>
-                <input type="email" id="signup-email" placeholder="Correo electrónico" required>
-                <input type="password" id="signup-password" placeholder="Contraseña (mín. 6 caracteres)" required>
-                <button id="signup-button">Registrar</button>
-                <p>¿Ya tienes cuenta? <a href="#" id="show-login">Inicia Sesión</a></p>
+        </div>
+    </div>
+
+    <div id="mainAppContent" class="container flex-grow hidden">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-center text-indigo-700 mt-4">Gestor FabricandoHogares</h1>
+            <div class="card mt-4 p-4 text-center flex flex-col sm:flex-row justify-between items-center flex-wrap gap-2">
+                <p class="text-sm text-gray-600">Usuario: <span id="userEmailDisplay" class="font-semibold text-gray-800 break-all">Cargando...</span></p>
+                <button id="logoutBtn" class="btn-danger px-4 py-2 text-sm">Cerrar Sesión</button>
             </div>
-        </section>
+        </header>
 
-        <section id="app-section" style="display:none;">
-            <h2>Panel Principal</h2>
+        <div class="card mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Resumen Financiero</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="text-lg font-medium text-blue-800">Total Ingresos:</p>
+                    <p id="totalIncome" class="text-3xl font-bold text-blue-700 mt-2">€0.00</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <p class="text-lg font-medium text-red-800">Total Gastos:</p>
+                    <p id="totalExpenses" class="text-3xl font-bold text-red-700 mt-2">€0.00</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <p class="text-lg font-medium text-green-800">Balance:</p>
+                    <p id="balance" class="text-3xl font-bold text-green-700 mt-2">€0.00</p>
+                </div>
+            </div>
+            <div class="flex justify-center flex-wrap gap-4">
+                <button id="showCategoryAnalysisBtn" class="btn-secondary">Análisis Gastos por Categoría</button>
+                <button id="showMonthlyAnalysisBtn" class="btn-secondary">Análisis Gastos Mensual</button>
+            </div>
+        </div>
 
-            <div class="form-container">
-                <h3>Añadir Nueva Transacción</h3>
-                <select id="transaction-type">
-                    <option value="ingreso">Ingreso</option>
-                    <option value="gasto">Gasto</option>
-                </select>
-                <input type="text" id="transaction-description" placeholder="Descripción">
-                <input type="number" id="transaction-amount" placeholder="Monto (€)">
-                <input type="date" id="transaction-date">
-                <select id="transaction-category">
-                    <option value="momentaneo">Momentáneo</option>
-                    <option value="semanal">Semanal</option>
-                    <option value="mensual">Mensual</option>
-                    <option value="anual">Anual</option>
-                </select>
-                <input type="text" id="transaction-property" placeholder="Inmueble asociado (Opcional)">
-                <button id="add-transaction-button">Añadir Transacción</button>
+        <div class="card mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Próximos Pagos/Cobros (Próximos 7 días)</h2>
+            <div id="upcomingItemsList" class="space-y-3">
+                <p class="text-gray-500 text-center" id="noUpcomingMessage">No hay pagos o cobros próximos.</p>
+            </div>
+        </div>
+        
+        <div class="flex justify-center mb-6">
+            <button id="tabTransactions" class="px-6 py-3 font-semibold text-lg rounded-t-lg bg-indigo-600 text-white shadow-md transition-colors duration-200">Transacciones</button>
+            <button id="tabProjects" class="px-6 py-3 font-semibold text-lg rounded-t-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200">Proyectos/Propiedades</button>
+            <button id="tabBudgets" class="px-6 py-3 font-semibold text-lg rounded-t-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200">Presupuestos</button>
+        </div>
+
+        <div id="transactionsSection" class="card">
+            <div class="flex justify-center mb-6">
+                <button id="subTabExpenses" class="px-6 py-3 font-semibold text-lg rounded-t-lg bg-indigo-600 text-white shadow-md transition-colors duration-200">Gastos</button>
+                <button id="subTabIncome" class="px-6 py-3 font-semibold text-lg rounded-t-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200">Ingresos</button>
             </div>
 
-            <div class="filters-analysis">
-                <h3>Filtros y Análisis</h3>
-                <label for="filter-month">Mes:</label>
-                <input type="month" id="filter-month">
-                <label for="filter-type">Tipo:</label>
-                <select id="filter-type">
-                    <option value="todos">Todos</option>
-                    <option value="ingreso">Ingresos</option>
-                    <option value="gasto">Gastos</option>
-                </select>
-                <button id="apply-filters-button">Aplicar Filtros</button>
-                <div id="summary">
-                    <p>Total Ingresos: <span id="total-ingresos">0.00</span> €</p>
-                    <p>Total Gastos: <span id="total-gastos">0.00</span> €</p>
-                    <p>Balance: <span id="balance">0.00</span> €</p>
+            <div id="expenseContent" class="">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Añadir Nuevo Gasto</h2>
+                <form id="expenseForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="expenseDescription" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <input type="text" id="expenseDescription" placeholder="Material de oficina, Alquiler, etc." required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="expenseAmount" class="block text-sm font-medium text-gray-700 mb-1">Importe (€)</label>
+                        <input type="number" id="expenseAmount" step="0.01" placeholder="Ej: 150.75" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="expenseDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                        <input type="date" id="expenseDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="expenseCategory" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                        <select id="expenseCategory" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="">Selecciona una categoría</option>
+                            <option value="Material de Oficina">Material de Oficina</option>
+                            <option value="Suministros">Suministros</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Comidas">Comidas</option>
+                            <option value="Alquiler">Alquiler</option>
+                            <option value="Servicios Profesionales">Servicios Profesionales</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Software/Suscripciones">Software/Suscripciones</option>
+                            <option value="Comisiones">Comisiones</option>
+                            <option value="Reformas/Mantenimiento">Reformas/Mantenimiento</option>
+                            <option value="Impuestos Propiedad">Impuestos Propiedad</option>
+                            <option value="Seguros Inmobiliarios">Seguros Inmobiliarios</option>
+                            <option value="Publicidad Inmobiliaria">Publicidad Inmobiliaria</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="expenseFrequency" class="block text-sm font-medium text-gray-700 mb-1">Frecuencia</label>
+                        <select id="expenseFrequency" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="Momentáneo">Momentáneo</option>
+                            <option value="Semanal">Semanal</option>
+                            <option value="Mensual">Mensual</option>
+                            <option value="Anual">Anual</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="expenseProject" class="block text-sm font-medium text-gray-700 mb-1">Proyecto/Propiedad (Opcional)</label>
+                        <select id="expenseProject" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="">Ninguno</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 flex justify-end">
+                        <button type="submit" class="btn-primary w-full md:w-auto">Añadir Gasto</button>
+                    </div>
+                </form>
+
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 mt-8">Lista de Gastos</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label for="filterExpenseCategory" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Categoría</label>
+                        <select id="filterExpenseCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                             <option value="">Todas las categorías</option>
+                            <option value="Material de Oficina">Material de Oficina</option>
+                            <option value="Suministros">Suministros</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Comidas">Comidas</option>
+                            <option value="Alquiler">Alquiler</option>
+                            <option value="Servicios Profesionales">Servicios Profesionales</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Software/Suscripciones">Software/Suscripciones</option>
+                            <option value="Comisiones">Comisiones</option>
+                            <option value="Reformas/Mantenimiento">Reformas/Mantenimiento</option>
+                            <option value="Impuestos Propiedad">Impuestos Propiedad</option>
+                            <option value="Seguros Inmobiliarios">Seguros Inmobiliarios</option>
+                            <option value="Publicidad Inmobiliaria">Publicidad Inmobiliaria</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filterExpenseDate" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Fecha (Exacta)</label>
+                        <input type="date" id="filterExpenseDate" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="searchExpense" class="block text-sm font-medium text-gray-700 mb-1">Buscar Gasto</option>
+                        <input type="text" id="searchExpense" placeholder="Buscar por descripción..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <div id="expensesList" class="space-y-4">
+                    <p class="text-gray-500 text-center" id="noExpensesMessage">No hay gastos registrados aún.</p>
                 </div>
             </div>
 
-            <div class="transactions-list">
-                <h3>Historial de Transacciones</h3>
-                <ul id="transactions-ul">
-                    </ul>
-            </div>
+            <div id="incomeContent" class="hidden">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Añadir Nuevo Ingreso</h2>
+                <form id="incomeForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="incomeDescription" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <input type="text" id="incomeDescription" placeholder="Venta de propiedad, Comisión, Alquiler, etc." required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="incomeAmount" class="block text-sm font-medium text-gray-700 mb-1">Importe (€)</label>
+                        <input type="number" id="incomeAmount" step="0.01" placeholder="Ej: 500.00" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="incomeDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                        <input type="date" id="incomeDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="incomeCategory" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                        <select id="incomeCategory" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="">Selecciona una categoría</option>
+                            <option value="Ventas de Propiedades">Ventas de Propiedades</option>
+                            <option value="Alquileres">Alquileres</option>
+                            <option value="Comisiones Ventas">Comisiones Ventas</option>
+                            <option value="Comisiones Alquiler">Comisiones Alquiler</option>
+                            <option value="Servicios de Gestión">Servicios de Gestión</option>
+                            <option value="Otros Ingresos Inmobiliarios">Otros Ingresos Inmobiliarios</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="incomeFrequency" class="block text-sm font-medium text-gray-700 mb-1">Frecuencia</label>
+                        <select id="incomeFrequency" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="Momentáneo">Momentáneo</option>
+                            <option value="Semanal">Semanal</option>
+                            <option value="Mensual">Mensual</option>
+                            <option value="Anual">Anual</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="incomeProject" class="block text-sm font-medium text-gray-700 mb-1">Proyecto/Propiedad (Opcional)</label>
+                        <select id="incomeProject" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="">Ninguno</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 flex justify-end">
+                        <button type="submit" class="btn-primary w-full md:w-auto">Añadir Ingreso</button>
+                    </div>
+                </form>
 
-            <div id="alerts-section">
-                <h3>Alertas Pendientes</h3>
-                <ul id="alerts-ul">
-                    </ul>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 mt-8">Lista de Ingresos</h3>
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label for="filterIncomeCategory" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Categoría</label>
+                        <select id="filterIncomeCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="">Todas las categorías</option>
+                            <option value="Ventas de Propiedades">Ventas de Propiedades</option>
+                            <option value="Alquileres">Alquileres</option>
+                            <option value="Comisiones Ventas">Comisiones Ventas</option>
+                            <option value="Comisiones Alquiler">Comisiones Alquiler</option>
+                            <option value="Servicios de Gestión">Servicios de Gestión</option>
+                            <option value="Otros Ingresos Inmobiliarios">Otros Ingresos Inmobiliarios</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filterIncomeDate" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Fecha (Exacta)</label>
+                        <input type="date" id="filterIncomeDate" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="searchIncome" class="block text-sm font-medium text-gray-700 mb-1">Buscar Ingreso</option>
+                        <input type="text" id="searchIncome" placeholder="Buscar por descripción..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <div id="incomeList" class="space-y-4">
+                    <p class="text-gray-500 text-center" id="noIncomeMessage">No hay ingresos registrados aún.</p>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
 
-    <footer>
-        <p>&copy; <span id="current-year"></span> FabricandoHogares. Todos los derechos reservados.</p>
+        <div id="projectsSection" class="card hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Gestión de Proyectos/Propiedades</h2>
+            <form id="projectForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label for="projectName" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Proyecto/Propiedad</label>
+                    <input type="text" id="projectName" placeholder="Ej: Piso Calle Mayor 15" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="projectBudget" class="block text-sm font-medium text-gray-700 mb-1">Presupuesto Estimado (€) (Opcional)</label>
+                    <input type="number" id="projectBudget" step="0.01" placeholder="Ej: 150000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="md:col-span-2 flex justify-end">
+                    <button type="submit" class="btn-primary w-full md:w-auto">Añadir Proyecto</button>
+                </div>
+            </form>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Lista de Proyectos/Propiedades</h3>
+            <div id="projectsList" class="space-y-4">
+                <p class="text-gray-500 text-center" id="noProjectsMessage">No hay proyectos/propiedades registrados aún.</p>
+            </div>
+        </div>
+
+        <div id="budgetsSection" class="card hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Presupuestos por Categoría (Mensual)</h2>
+            <p class="text-gray-600 mb-4">Establece un presupuesto mensual para cada categoría de gasto. El progreso se basa en los gastos del <strong>mes actual</strong>.</p>
+            
+            <form id="budgetForm" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label for="budgetCategory" class="block text-sm font-medium text-gray-700 mb-1">Categoría de Gasto</label>
+                    <select id="budgetCategory" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                        <option value="">Selecciona una categoría de gasto</option>
+                        <option value="Material de Oficina">Material de Oficina</option>
+                        <option value="Suministros">Suministros</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Comidas">Comidas</option>
+                        <option value="Alquiler">Alquiler</option>
+                        <option value="Servicios Profesionales">Servicios Profesionales</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Software/Suscripciones">Software/Suscripciones</option>
+                        <option value="Comisiones">Comisiones</option>
+                        <option value="Reformas/Mantenimiento">Reformas/Mantenimiento</option>
+                        <option value="Impuestos Propiedad">Impuestos Propiedad</option>
+                        <option value="Seguros Inmobiliarios">Seguros Inmobiliarios</option>
+                        <option value="Publicidad Inmobiliaria">Publicidad Inmobiliaria</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="budgetAmount" class="block text-sm font-medium text-gray-700 mb-1">Presupuesto Mensual (€)</label>
+                    <input type="number" id="budgetAmount" step="0.01" placeholder="Ej: 500" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="md:col-span-2 flex justify-end">
+                    <button type="submit" class="btn-primary w-full md:w-auto">Guardar/Actualizar Presupuesto</button>
+                </div>
+            </form>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Tus Presupuestos</h3>
+            <div id="budgetsList" class="space-y-6">
+                <p class="text-gray-500 text-center" id="noBudgetsMessage">No hay presupuestos definidos aún.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content text-center">
+            <span class="close-button" id="closeConfirmationModal">&times;</span>
+            <p class="text-lg font-semibold mb-4">¿Estás seguro de que quieres eliminar este elemento?</p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmDeleteBtn" class="btn-danger px-6 py-2">Sí, eliminar</button>
+                <button id="cancelDeleteBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-md font-semibold hover:bg-gray-400 transition-colors">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeEditModal">&times;</span>
+            <h2 id="editModalTitle" class="text-2xl font-semibold text-gray-800 mb-6">Editar Elemento</h2>
+            <form id="editForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="editType">
+                <div id="editDescriptionContainer">
+                    <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <input type="text" id="editDescription" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div id="editAmountContainer">
+                    <label for="editAmount" class="block text-sm font-medium text-gray-700 mb-1">Importe (€)</label>
+                    <input type="number" id="editAmount" step="0.01" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div id="editDateContainer">
+                    <label for="editDate" class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                    <input type="date" id="editDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div id="editCategoryContainer">
+                    <label for="editCategory" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <select id="editCategory" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white"></select>
+                </div>
+                <div id="editFrequencyContainer">
+                    <label for="editFrequency" class="block text-sm font-medium text-gray-700 mb-1">Frecuencia</label>
+                    <select id="editFrequency" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                        <option value="Momentáneo">Momentáneo</option>
+                        <option value="Semanal">Semanal</option>
+                        <option value="Mensual">Mensual</option>
+                        <option value="Anual">Anual</option>
+                    </select>
+                </div>
+                <div id="editProjectContainer">
+                    <label for="editProject" class="block text-sm font-medium text-gray-700 mb-1">Proyecto/Propiedad</label>
+                    <select id="editProject" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                        <option value="">Ninguno</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2 flex justify-end">
+                    <button type="submit" class="btn-primary w-full md:w-auto">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="categoryAnalysisModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeCategoryAnalysisModal">&times;</span>
+            <div id="categoryAnalysisContent"></div>
+            <button id="closeCategoryAnalysisModalBtn" class="btn-secondary mt-4">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="monthlyAnalysisModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeMonthlyAnalysisModal">&times;</span>
+            <div id="monthlyAnalysisContentElement"></div> <button id="closeMonthlyAnalysisModalBtn" class="btn-secondary mt-4">Cerrar</button>
+        </div>
+    </div>
+    
+    <footer class="bg-gray-800 text-white text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> FabricandoHogares. App de Gestión Interna.</p>
     </footer>
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js"; // Última versión estable al momento de escribir
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, Timestamp, onSnapshot, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+        // Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+        import { 
+            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
+            signOut, onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
+        import { 
+            getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, 
+            onSnapshot, collection, query, where, getDocs, Timestamp, orderBy, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // TU CONFIGURACIÓN REAL DE FIREBASE AQUÍ
         const firebaseConfig = {
- 	 apiKey: "AIzaSyCDBg8qM50VpW59IBQ94ZhLceq2sCwf1rc",
- 	 authDomain: "gastosinmobiliaria.firebaseapp.com",
-	  projectId: "gastosinmobiliaria",
- 	 storageBucket: "gastosinmobiliaria.firebasestorage.app",
- 	 messagingSenderId: "690296047200",
-  	appId: "1:690296047200:web:b37efc46d3ae0dfe03e505",
-  	measurementId: "G-GZTXT2VSM5"
+            apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXX", // ¡¡¡REEMPLAZA ESTO!!!
+            authDomain: "tu-proyecto.firebaseapp.com",    // ¡¡¡REEMPLAZA ESTO!!!
+            projectId: "tu-proyecto",                     // ¡¡¡REEMPLAZA ESTO!!!
+            storageBucket: "tu-proyecto.appspot.com",   // ¡¡¡REEMPLAZA ESTO!!!
+            messagingSenderId: "000000000000",            // ¡¡¡REEMPLAZA ESTO!!!
+            appId: "1:000000000000:web:000000000000000000" // ¡¡¡REEMPLAZA ESTO!!!
+            // measurementId: "G-XXXXXXXXXX" // Opcional
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Global variables for Firebase
+        let app;
+        let db;
+        let auth;
+        let currentUserId = null; 
+        const appId = firebaseConfig.projectId; // Consistent with your Firestore path
 
-        // Exportar para usarlos en otros scripts
-        // Hacemos esto para que estén disponibles globalmente en el scope del módulo
-        window.firebase = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, query, where, getDocs, Timestamp, onSnapshot, orderBy, doc, deleteDoc, updateDoc };
+        // DOM Elements - Auth Section (Accessed immediately)
+        const authSection = document.getElementById('authSection');
+        const mainAppContent = document.getElementById('mainAppContent');
+        const authTitle = document.getElementById('authTitle');
+        const authForm = document.getElementById('authForm');
+        const authEmailInput = document.getElementById('authEmail');
+        const authPasswordInput = document.getElementById('authPassword');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const authMessage = document.getElementById('authMessage');
+        const toggleAuthModeBtn = document.getElementById('toggleAuthModeBtn');
+        let isLoginMode = true; 
 
-    </script>
+        // DOM Elements - Main App (Initialized inside onAuthStateChanged or attachEventListeners)
+        let userEmailDisplay;
+        let logoutBtn;
+        
+        let expenseForm, incomeForm, projectForm, budgetForm;
+        let expenseDescriptionInput, expenseAmountInput, expenseDateInput, expenseCategorySelect, expenseFrequencySelect, expenseProjectSelect;
+        let incomeDescriptionInput, incomeAmountInput, incomeDateInput, incomeCategorySelect, incomeFrequencySelect, incomeProjectSelect;
+        let projectNameInput, projectBudgetInput;
+        let budgetCategorySelectInput, budgetAmountInput; // Renamed for clarity
 
-    <script type="module" src="js/auth.js"></script>
-    <script type="module" src="js/app.js"></script>
-    <script>
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+        let expensesList, incomeList, projectsList, budgetsList;
+        let totalExpensesDisplay, totalIncomeDisplay, balanceDisplay;
+        let noExpensesMessage, noIncomeMessage, noProjectsMessage, noBudgetsMessage;
+        
+        let upcomingItemsList, noUpcomingMessage;
+
+        let filterExpenseCategory, filterExpenseDate, searchExpense;
+        let filterIncomeCategory, filterIncomeDate, searchIncome;
+
+        let tabTransactions, tabProjects, tabBudgets;
+        let transactionsSection, projectsSection, budgetsSection;
+
+        let subTabExpenses, subTabIncome;
+        let expenseContent, incomeContent;
+
+        let confirmationModal, closeConfirmationModal, confirmDeleteBtn, cancelDeleteBtn;
+        let editModal, closeEditModal, editForm, editModalTitle;
+        let editIdInput, editTypeInput, editDescriptionInput, editAmountInput, editDateInput, editCategorySelect, editFrequencySelect, editProjectSelect;
+        let editDescriptionContainer, editAmountContainer, editDateContainer, editCategoryContainer, editFrequencyContainer, editProjectContainer;
+
+
+        let categoryAnalysisModal, closeCategoryAnalysisModal, closeCategoryAnalysisModalBtn, categoryAnalysisContent;
+        let monthlyAnalysisModal, closeMonthlyAnalysisModal, closeMonthlyAnalysisModalBtn, monthlyAnalysisContentElement;
+
+        let itemToDelete = null;
+        let allExpenses = [];
+        let allIncomes = [];
+        let allProjects = [];
+        let allBudgets = [];
+
+        // --- Firebase Initialization and Authentication ---
+        const initializeFirebase = () => {
+            try {
+                if (!app) { // Prevent re-initialization
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        initializeMainAppDOMElements(); // Initialize DOM elements for main app
+                        
+                        userEmailDisplay.textContent = user.email || user.uid; 
+                        authSection.classList.add('hidden');
+                        mainAppContent.classList.remove('hidden');
+                        
+                        attachEventListeners(); // Attach listeners that depend on main app DOM
+                        
+                        // Start listening for data
+                        listenForExpenses();
+                        listenForIncomes();
+                        listenForProjects(); // This will also call populateProjectSelects
+                        listenForBudgets();
+                        
+                        switchMainTab('transactions'); // Default to transactions tab
+                        switchSubTab('expenses'); // Default to expenses sub-tab
+                        if(expenseDateInput) expenseDateInput.valueAsDate = new Date(); // Set default date
+                        if(incomeDateInput) incomeDateInput.valueAsDate = new Date(); // Set default date
+
+
+                    } else {
+                        currentUserId = null;
+                        authSection.classList.remove('hidden');
+                        mainAppContent.classList.add('hidden');
+                        clearAppData(); // Clear data when logged out
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                authMessage.textContent = `Error de Firebase: ${error.message}`;
+                authMessage.classList.remove('hidden');
+            }
+        };
+        
+        const initializeMainAppDOMElements = () => {
+            userEmailDisplay = document.getElementById('userEmailDisplay');
+            logoutBtn = document.getElementById('logoutBtn');
+            
+            expenseForm = document.getElementById('expenseForm');
+            expenseDescriptionInput = document.getElementById('expenseDescription');
+            expenseAmountInput = document.getElementById('expenseAmount');
+            expenseDateInput = document.getElementById('expenseDate');
+            expenseCategorySelect = document.getElementById('expenseCategory');
+            expenseFrequencySelect = document.getElementById('expenseFrequency');
+            expenseProjectSelect = document.getElementById('expenseProject');
+
+            incomeForm = document.getElementById('incomeForm');
+            incomeDescriptionInput = document.getElementById('incomeDescription');
+            incomeAmountInput = document.getElementById('incomeAmount');
+            incomeDateInput = document.getElementById('incomeDate');
+            incomeCategorySelect = document.getElementById('incomeCategory');
+            incomeFrequencySelect = document.getElementById('incomeFrequency');
+            incomeProjectSelect = document.getElementById('incomeProject');
+
+            projectForm = document.getElementById('projectForm');
+            projectNameInput = document.getElementById('projectName');
+            projectBudgetInput = document.getElementById('projectBudget');
+
+            budgetForm = document.getElementById('budgetForm');
+            budgetCategorySelectInput = document.getElementById('budgetCategory'); // Corrected variable name
+            budgetAmountInput = document.getElementById('budgetAmount');
+
+            expensesList = document.getElementById('expensesList');
+            incomeList = document.getElementById('incomeList');
+            projectsList = document.getElementById('projectsList');
+            budgetsList = document.getElementById('budgetsList');
+
+            totalExpensesDisplay = document.getElementById('totalExpenses');
+            totalIncomeDisplay = document.getElementById('totalIncome');
+            balanceDisplay = document.getElementById('balance');
+
+            noExpensesMessage = document.getElementById('noExpensesMessage');
+            noIncomeMessage = document.getElementById('noIncomeMessage');
+            noProjectsMessage = document.getElementById('noProjectsMessage');
+            noBudgetsMessage = document.getElementById('noBudgetsMessage');
+            
+            upcomingItemsList = document.getElementById('upcomingItemsList');
+            noUpcomingMessage = document.getElementById('noUpcomingMessage');
+
+            filterExpenseCategory = document.getElementById('filterExpenseCategory');
+            filterExpenseDate = document.getElementById('filterExpenseDate');
+            searchExpense = document.getElementById('searchExpense');
+            filterIncomeCategory = document.getElementById('filterIncomeCategory');
+            filterIncomeDate = document.getElementById('filterIncomeDate');
+            searchIncome = document.getElementById('searchIncome');
+
+            tabTransactions = document.getElementById('tabTransactions');
+            tabProjects = document.getElementById('tabProjects');
+            tabBudgets = document.getElementById('tabBudgets');
+            transactionsSection = document.getElementById('transactionsSection');
+            projectsSection = document.getElementById('projectsSection');
+            budgetsSection = document.getElementById('budgetsSection');
+
+            subTabExpenses = document.getElementById('subTabExpenses');
+            subTabIncome = document.getElementById('subTabIncome');
+            expenseContent = document.getElementById('expenseContent');
+            incomeContent = document.getElementById('incomeContent');
+
+            confirmationModal = document.getElementById('confirmationModal');
+            closeConfirmationModal = document.getElementById('closeConfirmationModal');
+            confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+            editModal = document.getElementById('editModal');
+            editModalTitle = document.getElementById('editModalTitle');
+            closeEditModal = document.getElementById('closeEditModal');
+            editForm = document.getElementById('editForm');
+            editIdInput = document.getElementById('editId');
+            editTypeInput = document.getElementById('editType');
+            editDescriptionInput = document.getElementById('editDescription');
+            editAmountInput = document.getElementById('editAmount');
+            editDateInput = document.getElementById('editDate');
+            editCategorySelect = document.getElementById('editCategory');
+            editFrequencySelect = document.getElementById('editFrequency');
+            editProjectSelect = document.getElementById('editProject');
+            
+            editDescriptionContainer = document.getElementById('editDescriptionContainer');
+            editAmountContainer = document.getElementById('editAmountContainer');
+            editDateContainer = document.getElementById('editDateContainer');
+            editCategoryContainer = document.getElementById('editCategoryContainer');
+            editFrequencyContainer = document.getElementById('editFrequencyContainer');
+            editProjectContainer = document.getElementById('editProjectContainer');
+
+
+            categoryAnalysisModal = document.getElementById('categoryAnalysisModal');
+            closeCategoryAnalysisModal = document.getElementById('closeCategoryAnalysisModal');
+            closeCategoryAnalysisModalBtn = document.getElementById('closeCategoryAnalysisModalBtn');
+            categoryAnalysisContent = document.getElementById('categoryAnalysisContent');
+
+            monthlyAnalysisModal = document.getElementById('monthlyAnalysisModal');
+            closeMonthlyAnalysisModal = document.getElementById('closeMonthlyAnalysisModal');
+            closeMonthlyAnalysisModalBtn = document.getElementById('closeMonthlyAnalysisModalBtn');
+            monthlyAnalysisContentElement = document.getElementById('monthlyAnalysisContentElement'); // Corrected
+            
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        };
+
+        const clearAppData = () => {
+            if(userEmailDisplay) userEmailDisplay.textContent = 'No autenticado';
+            if (expensesList) expensesList.innerHTML = '<p class="text-gray-500 text-center">Inicia sesión para ver tus gastos.</p>';
+            if (incomeList) incomeList.innerHTML = '<p class="text-gray-500 text-center">Inicia sesión para ver tus ingresos.</p>';
+            if (projectsList) projectsList.innerHTML = '<p class="text-gray-500 text-center">Inicia sesión para ver tus proyectos.</p>';
+            if (budgetsList) budgetsList.innerHTML = '<p class="text-gray-500 text-center">Inicia sesión para ver tus presupuestos.</p>';
+            if (totalExpensesDisplay) totalExpensesDisplay.textContent = '€0.00';
+            if (totalIncomeDisplay) totalIncomeDisplay.textContent = '€0.00';
+            if (balanceDisplay) balanceDisplay.textContent = '€0.00';
+            if (upcomingItemsList) upcomingItemsList.innerHTML = '<p class="text-gray-500 text-center">Inicia sesión para ver tus próximos pagos/cobros.</p>';
+            allExpenses = [];
+            allIncomes = [];
+            allProjects = [];
+            allBudgets = [];
+        };
+
+        // --- Authentication Functions ---
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+            authMessage.classList.add('hidden'); 
+
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    // Optionally, automatically log in or switch to login mode after registration
+                    authForm.reset(); // Clear form after successful registration
+                    alert("¡Registro exitoso! Por favor, inicia sesión.");
+                    isLoginMode = true; // Switch to login mode
+                    authTitle.textContent = "Iniciar Sesión";
+                    authSubmitBtn.textContent = "Iniciar Sesión";
+                    toggleAuthModeBtn.textContent = "¿No tienes cuenta? Regístrate aquí";
+                }
+            } catch (error) {
+                console.error("Auth error:", error.code, error.message);
+                let userFriendlyMessage = "Ha ocurrido un error. Por favor, inténtalo de nuevo.";
+                if (error.code === 'auth/invalid-email') userFriendlyMessage = "Formato de email inválido.";
+                else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') userFriendlyMessage = "Email o contraseña incorrectos.";
+                else if (error.code === 'auth/email-already-in-use') userFriendlyMessage = "Este email ya está registrado. Intenta iniciar sesión.";
+                else if (error.code === 'auth/weak-password') userFriendlyMessage = "La contraseña debe tener al menos 6 caracteres.";
+                
+                authMessage.textContent = userFriendlyMessage;
+                authMessage.classList.remove('hidden');
+            }
+        });
+
+        toggleAuthModeBtn.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            authTitle.textContent = isLoginMode ? "Iniciar Sesión" : "Registrarse";
+            authSubmitBtn.textContent = isLoginMode ? "Iniciar Sesión" : "Registrarse";
+            toggleAuthModeBtn.textContent = isLoginMode ? "¿No tienes cuenta? Regístrate aquí" : "¿Ya tienes cuenta? Inicia sesión aquí";
+            authMessage.classList.add('hidden');
+            authForm.reset();
+        });
+        
+        // --- Generic Data Handling Functions (Firestore) ---
+        const getCollectionRef = (collectionName) => {
+            if (!currentUserId) { 
+                console.error("No user authenticated for collection ref."); 
+                throw new Error("Usuario no autenticado"); // Throw error to stop execution
+            }
+            // Your Firestore path structure:
+            return collection(db, `artifacts/${appId}/users/${currentUserId}/${collectionName}`);
+        };
+
+        const getDocumentRef = (collectionName, id) => {
+             if (!currentUserId) { 
+                console.error("No user authenticated for doc ref."); 
+                throw new Error("Usuario no autenticado");
+            }
+            return doc(db, `artifacts/${appId}/users/${currentUserId}/${collectionName}`, id);
+        };
+        
+        const addDocument = async (collectionName, data) => {
+            try {
+                const collRef = getCollectionRef(collectionName);
+                await addDoc(collRef, { ...data, createdAt: serverTimestamp() }); // Use serverTimestamp for consistency
+                console.log(`${collectionName} añadido con éxito.`);
+                return true;
+            } catch (e) { 
+                console.error(`Error al añadir ${collectionName}: `, e); 
+                alert(`Error al añadir: ${e.message}`);
+                return false;
+            }
+        };
+
+        const deleteDocumentFromDb = async (collectionName, id) => { // Renamed to avoid conflict
+            try {
+                const docRef = getDocumentRef(collectionName, id);
+                await deleteDoc(docRef);
+                console.log(`${collectionName} con ID ${id} eliminado con éxito.`);
+                return true;
+            } catch (e) { 
+                console.error(`Error al eliminar ${collectionName}: `, e); 
+                alert(`Error al eliminar: ${e.message}`);
+                return false;
+            }
+        };
+
+        const updateDocumentInDb = async (collectionName, id, updatedData) => { // Renamed
+            try {
+                const docRef = getDocumentRef(collectionName, id);
+                await updateDoc(docRef, { ...updatedData, updatedAt: serverTimestamp() });
+                console.log(`${collectionName} actualizado con éxito.`);
+                return true;
+            } catch (e) { 
+                console.error(`Error al actualizar ${collectionName}: `, e);
+                alert(`Error al actualizar: ${e.message}`);
+                return false;
+            }
+        };
+
+        // --- Balance Update Function ---
+        const updateBalance = () => {
+            if(!totalExpensesDisplay || !totalIncomeDisplay || !balanceDisplay) return; // Ensure elements are loaded
+            const totalExp = parseFloat(totalExpensesDisplay.textContent.replace('€', '')) || 0;
+            const totalInc = parseFloat(totalIncomeDisplay.textContent.replace('€', '')) || 0;
+            const currentBalance = totalInc - totalExp;
+            balanceDisplay.textContent = `€${currentBalance.toFixed(2)}`;
+            balanceDisplay.classList.toggle('text-red-700', currentBalance < 0);
+            balanceDisplay.classList.toggle('text-green-700', currentBalance >= 0);
+        };
+
+        // --- Data Listeners and Renderers ---
+        const listenForExpenses = () => {
+            if (!currentUserId) return;
+            const q = query(getCollectionRef('expenses'), orderBy('date', 'desc'));
+            onSnapshot(q, (snapshot) => {
+                allExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderExpenses(allExpenses);
+                updateUpcomingItems();
+                renderBudgets(); 
+            }, (error) => { console.error("Error al escuchar gastos:", error); });
+        };
+
+        const listenForIncomes = () => {
+            if (!currentUserId) return;
+            const q = query(getCollectionRef('incomes'), orderBy('date', 'desc'));
+            onSnapshot(q, (snapshot) => {
+                allIncomes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderIncomes(allIncomes);
+                updateUpcomingItems();
+            }, (error) => { console.error("Error al escuchar ingresos:", error); });
+        };
+        
+        const listenForProjects = () => {
+            if (!currentUserId) return;
+            const q = query(getCollectionRef('projects'), orderBy('name', 'asc'));
+            onSnapshot(q, (snapshot) => {
+                allProjects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderProjects();
+                populateProjectSelects();
+            }, (error) => { console.error("Error al escuchar proyectos:", error); });
+        };
+
+        const listenForBudgets = () => {
+            if (!currentUserId) return;
+            const q = query(getCollectionRef('budgets'), orderBy('category', 'asc'));
+            onSnapshot(q, (snapshot) => {
+                allBudgets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderBudgets();
+            }, (error) => { console.error("Error al escuchar presupuestos:", error); });
+        };
+
+        // --- Rendering Functions ---
+        const formatDateForDisplay = (dateString) => {
+            if (!dateString) return 'N/A';
+            // Dates from Firestore might be Timestamps or strings. Handle both.
+            if (dateString.toDate) { // Firestore Timestamp
+                return dateString.toDate().toLocaleDateString('es-ES');
+            }
+            // Assuming YYYY-MM-DD string from input type="date"
+            const [year, month, day] = dateString.split('-');
+            if(year && month && day) { // Basic check for YYYY-MM-DD
+                 return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString('es-ES');
+            }
+            return dateString; // Fallback
+        };
+        
+        const renderExpenses = (expensesToRender) => {
+            if (!expensesList || !noExpensesMessage || !totalExpensesDisplay) return;
+            let filteredExpenses = [...expensesToRender];
+            const categoryFilter = filterExpenseCategory.value;
+            if (categoryFilter) filteredExpenses = filteredExpenses.filter(exp => exp.category === categoryFilter);
+            const dateFilter = filterExpenseDate.value;
+            if (dateFilter) filteredExpenses = filteredExpenses.filter(exp => exp.date === dateFilter);
+            const searchQuery = searchExpense.value.toLowerCase();
+            if (searchQuery) filteredExpenses = filteredExpenses.filter(exp => 
+                exp.description.toLowerCase().includes(searchQuery) || 
+                exp.category.toLowerCase().includes(searchQuery)
+            );
+
+            expensesList.innerHTML = '';
+            let total = 0;
+            if (filteredExpenses.length === 0) {
+                noExpensesMessage.classList.remove('hidden');
+            } else {
+                noExpensesMessage.classList.add('hidden');
+                filteredExpenses.forEach(expense => {
+                    total += parseFloat(expense.amount) || 0;
+                    const projectName = expense.project ? (allProjects.find(p => p.id === expense.project)?.name || 'Asignado (Proyecto eliminado)') : 'N/A';
+                    const expenseItem = document.createElement('div');
+                    expenseItem.className = 'bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-sm';
+                    expenseItem.innerHTML = `
+                        <div class="flex-grow mb-2 sm:mb-0">
+                            <p class="text-lg font-semibold text-gray-800">${expense.description}</p>
+                            <p class="text-sm text-gray-600">Categoría: <span class="font-medium">${expense.category}</span> | Fecha: <span class="font-medium">${formatDateForDisplay(expense.date)}</span></p>
+                            <p class="text-xs text-gray-500">Frecuencia: ${expense.frequency || 'Momentáneo'} | Proyecto: ${projectName}</p>
+                        </div>
+                        <div class="flex items-center space-x-3 mt-2 sm:mt-0">
+                            <p class="text-xl font-bold text-red-600">€${(parseFloat(expense.amount) || 0).toFixed(2)}</p>
+                            <button class="btn-secondary px-3 py-1 text-xs edit-btn" data-id="${expense.id}" data-type="expenses">Editar</button>
+                            <button class="btn-danger px-3 py-1 text-xs delete-btn" data-id="${expense.id}" data-type="expenses">Eliminar</button>
+                        </div>`;
+                    expensesList.appendChild(expenseItem);
+                });
+            }
+            totalExpensesDisplay.textContent = `€${total.toFixed(2)}`;
+            updateBalance();
+        };
+
+        const renderIncomes = (incomesToRender) => {
+            if (!incomeList || !noIncomeMessage || !totalIncomeDisplay) return;
+            let filteredIncomes = [...incomesToRender];
+            const categoryFilter = filterIncomeCategory.value;
+            if (categoryFilter) filteredIncomes = filteredIncomes.filter(inc => inc.category === categoryFilter);
+            const dateFilter = filterIncomeDate.value;
+            if (dateFilter) filteredIncomes = filteredIncomes.filter(inc => inc.date === dateFilter);
+            const searchQuery = searchIncome.value.toLowerCase();
+            if (searchQuery) filteredIncomes = filteredIncomes.filter(inc => 
+                inc.description.toLowerCase().includes(searchQuery) || 
+                inc.category.toLowerCase().includes(searchQuery)
+            );
+            
+            incomeList.innerHTML = '';
+            let total = 0;
+            if (filteredIncomes.length === 0) {
+                noIncomeMessage.classList.remove('hidden');
+            } else {
+                noIncomeMessage.classList.add('hidden');
+                filteredIncomes.forEach(income => {
+                    total += parseFloat(income.amount) || 0;
+                    const projectName = income.project ? (allProjects.find(p => p.id === income.project)?.name || 'Asignado (Proyecto eliminado)') : 'N/A';
+                    const incomeItem = document.createElement('div');
+                    incomeItem.className = 'bg-gray-50 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center shadow-sm';
+                    incomeItem.innerHTML = `
+                        <div class="flex-grow mb-2 sm:mb-0">
+                            <p class="text-lg font-semibold text-gray-800">${income.description}</p>
+                            <p class="text-sm text-gray-600">Categoría: <span class="font-medium">${income.category}</span> | Fecha: <span class="font-medium">${formatDateForDisplay(income.date)}</span></p>
+                            <p class="text-xs text-gray-500">Frecuencia: ${income.frequency || 'Momentáneo'} | Proyecto: ${projectName}</p>
+                        </div>
+                        <div class="flex items-center space-x-3 mt-2 sm:mt-0">
+                            <p class="text-xl font-bold text-green-600">€${(parseFloat(income.amount) || 0).toFixed(2)}</p>
+                            <button class="btn-secondary px-3 py-1 text-xs edit-btn" data-id="${income.id}" data-type="incomes">Editar</button>
+                            <button class="btn-danger px-3 py-1 text-xs delete-btn" data-id="${income.id}" data-type="incomes">Eliminar</button>
+                        </div>`;
+                    incomeList.appendChild(incomeItem);
+                });
+            }
+            totalIncomeDisplay.textContent = `€${total.toFixed(2)}`;
+            updateBalance();
+        };
+        
+        const renderProjects = () => {
+            if (!projectsList || !noProjectsMessage) return;
+            projectsList.innerHTML = '';
+            if (allProjects.length === 0) {
+                noProjectsMessage.classList.remove('hidden');
+            } else {
+                noProjectsMessage.classList.add('hidden');
+                allProjects.forEach(project => {
+                    const projectExpenses = allExpenses.filter(exp => exp.project === project.id).reduce((sum, exp) => sum + (parseFloat(exp.amount) || 0), 0);
+                    const projectIncomes = allIncomes.filter(inc => inc.project === project.id).reduce((sum, inc) => sum + (parseFloat(inc.amount) || 0), 0);
+                    const projectBalance = projectIncomes - projectExpenses;
+
+                    const projectItem = document.createElement('div');
+                    projectItem.className = 'bg-blue-50 p-4 rounded-lg shadow-sm';
+                    projectItem.innerHTML = `
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                             <p class="text-lg font-semibold text-blue-800">${project.name}</p>
+                             <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+                                <button class="btn-secondary px-3 py-1 text-xs edit-btn" data-id="${project.id}" data-type="projects">Editar</button>
+                                <button class="btn-danger px-3 py-1 text-xs delete-btn" data-id="${project.id}" data-type="projects">Eliminar</button>
+                            </div>
+                        </div>
+                        <p class="text-sm text-blue-700">Presupuesto Estimado: €${project.budget ? (parseFloat(project.budget) || 0).toFixed(2) : 'N/A'}</p>
+                        <p class="text-sm text-blue-700">Gastos Totales: <span class="font-bold text-red-600">€${projectExpenses.toFixed(2)}</span></p>
+                        <p class="text-sm text-blue-700">Ingresos Totales: <span class="font-bold text-green-600">€${projectIncomes.toFixed(2)}</span></p>
+                        <p class="text-sm text-blue-700">Balance: <span class="font-bold ${projectBalance < 0 ? 'text-red-600' : 'text-green-600'}">€${projectBalance.toFixed(2)}</span></p>
+                    `;
+                    projectsList.appendChild(projectItem);
+                });
+            }
+        };
+
+        const renderBudgets = () => {
+            if (!budgetsList || !noBudgetsMessage) return;
+            budgetsList.innerHTML = '';
+            if (allBudgets.length === 0) {
+                noBudgetsMessage.classList.remove('hidden');
+            } else {
+                noBudgetsMessage.classList.add('hidden');
+                const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+                const expensesThisMonthByCategory = {};
+
+                allExpenses.forEach(exp => {
+                    if (exp.date && exp.date.startsWith(currentMonth)) {
+                        expensesThisMonthByCategory[exp.category] = (expensesThisMonthByCategory[exp.category] || 0) + (parseFloat(exp.amount) || 0);
+                    }
+                });
+
+                allBudgets.forEach(budget => {
+                    const spent = expensesThisMonthByCategory[budget.category] || 0;
+                    const budgetAmount = parseFloat(budget.amount) || 0;
+                    const percentage = budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0;
+                    const isOverBudget = spent > budgetAmount;
+
+                    const budgetItem = document.createElement('div');
+                    budgetItem.className = 'bg-gray-50 p-4 rounded-lg shadow-sm';
+                    budgetItem.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-lg font-semibold text-gray-800">${budget.category}</p>
+                            <div class="flex items-center space-x-2">
+                                <p class="text-sm text-gray-600">Presupuesto: <span class="font-bold">€${budgetAmount.toFixed(2)}</span></p>
+                                <button class="btn-secondary px-2 py-0.5 text-xs edit-btn" data-id="${budget.id}" data-type="budgets">Editar</button>
+                                <button class="btn-danger px-2 py-0.5 text-xs delete-btn" data-id="${budget.id}" data-type="budgets">Eliminar</button>
+                            </div>
+                        </div>
+                        <div class="budget-bar-container">
+                            <div class="budget-bar-fill ${isOverBudget ? 'over-budget' : ''}" style="width: ${Math.min(percentage, 100)}%;"></div>
+                        </div>
+                        <p class="budget-text text-gray-700">Gastado este mes: <span class="font-bold">€${spent.toFixed(2)}</span> (${percentage.toFixed(1)}%)</p>
+                        ${isOverBudget ? '<p class="text-red-500 font-semibold text-sm mt-1">¡Presupuesto excedido!</p>' : ''}
+                    `;
+                    budgetsList.appendChild(budgetItem);
+                });
+            }
+        };
+
+        // --- Project Select Population ---
+        const populateProjectSelects = () => {
+            const projectSelectElements = [expenseProjectSelect, incomeProjectSelect, editProjectSelect];
+            projectSelectElements.forEach(select => {
+                if (!select) return; // Ensure select element exists
+                const currentSelectedValue = select.value;
+                select.innerHTML = '<option value="">Ninguno</option>'; 
+                allProjects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.name;
+                    select.appendChild(option);
+                });
+                // Try to restore previous selection if project still exists
+                if (allProjects.some(p => p.id === currentSelectedValue)) {
+                    select.value = currentSelectedValue;
+                } else {
+                    select.value = ""; // Default to "Ninguno"
+                }
+            });
+        };
+        
+        // --- Upcoming Items Logic ---
+        const calculateNextDueDate = (lastDateStr, frequency) => {
+            if (!lastDateStr) return null;
+            const lastDate = new Date(lastDateStr + 'T00:00:00Z'); // Ensure UTC interpretation if no timezone
+            if (isNaN(lastDate.getTime())) return null; // Invalid date
+            
+            const nextDate = new Date(lastDate);
+            switch (frequency) {
+                case 'Semanal': nextDate.setDate(lastDate.getDate() + 7); break;
+                case 'Mensual': nextDate.setMonth(lastDate.getMonth() + 1); break;
+                case 'Anual': nextDate.setFullYear(lastDate.getFullYear() + 1); break;
+                default: return null;
+            }
+            return nextDate;
+        };
+
+        const updateUpcomingItems = () => {
+            if(!upcomingItemsList || !noUpcomingMessage) return;
+            upcomingItemsList.innerHTML = '';
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const sevenDaysFromNow = new Date(today); sevenDaysFromNow.setDate(today.getDate() + 7);
+
+            let hasUpcoming = false;
+            const upcomingBuffer = [];
+
+            const processItem = (item, type) => {
+                if (item.frequency !== 'Momentáneo' && item.date) {
+                    let nextDueDate = calculateNextDueDate(item.date, item.frequency);
+                    if (!nextDueDate) return;
+
+                    while (nextDueDate && nextDueDate < today) { // Find the *next* occurrence from today
+                        nextDueDate = calculateNextDueDate(nextDueDate.toISOString().split('T')[0], item.frequency);
+                        if(!nextDueDate) break;
+                    }
+
+                    if (nextDueDate && nextDueDate >= today && nextDueDate <= sevenDaysFromNow) {
+                        hasUpcoming = true;
+                        upcomingBuffer.push({ item, type, nextDueDate });
+                    }
+                }
+            };
+
+            allExpenses.forEach(exp => processItem(exp, 'expenses'));
+            allIncomes.forEach(inc => processItem(inc, 'incomes'));
+
+            // Sort upcoming items by due date
+            upcomingBuffer.sort((a,b) => a.nextDueDate - b.nextDueDate);
+
+            upcomingBuffer.forEach(({item, type, nextDueDate}) => {
+                 const itemElement = document.createElement('div');
+                itemElement.className = `p-3 rounded-md flex justify-between items-center text-sm shadow-sm ${type === 'expenses' ? 'bg-yellow-50 hover:bg-yellow-100' : 'bg-green-50 hover:bg-green-100'}`;
+                const textColor = type === 'expenses' ? 'text-yellow-700' : 'text-green-700';
+                const amountColor = type === 'expenses' ? 'text-red-600' : 'text-green-600';
+                
+                itemElement.innerHTML = `
+                    <p class="font-medium ${textColor}">${type === 'expenses' ? 'Gasto Próximo' : 'Ingreso Próximo'}: ${item.description} (${item.category})</p>
+                    <p class="${textColor}">Vence: ${nextDueDate.toLocaleDateString('es-ES')} (${item.frequency}) - <span class="font-bold ${amountColor}">€${(parseFloat(item.amount) || 0).toFixed(2)}</span></p>
+                `;
+                upcomingItemsList.appendChild(itemElement);
+            });
+
+
+            if (!hasUpcoming) {
+                noUpcomingMessage.classList.remove('hidden');
+            } else {
+                noUpcomingMessage.classList.add('hidden');
+            }
+        };
+        
+        // --- Analysis Modals ---
+        const showCategoryAnalysis = () => {
+            if (!categoryAnalysisModal || !categoryAnalysisContent) return;
+            if (allExpenses.length === 0) { 
+                categoryAnalysisContent.innerHTML = "<p class='text-center text-gray-600'>No hay gastos para analizar por categoría.</p>"; 
+                categoryAnalysisModal.style.display = 'flex'; return; 
+            }
+
+            const expensesByCategory = {};
+            allExpenses.forEach(exp => {
+                expensesByCategory[exp.category] = (expensesByCategory[exp.category] || 0) + (parseFloat(exp.amount) || 0);
+            });
+
+            let html = '<h3 class="text-xl font-semibold mb-4 text-center text-indigo-700">Gastos por Categoría (Total Histórico)</h3>';
+            html += '<div class="bar-chart-container">';
+            const maxAmount = Math.max(0, ...Object.values(expensesByCategory)); // Ensure maxAmount is not negative or NaN
+
+            Object.keys(expensesByCategory).sort().forEach(category => {
+                const amount = expensesByCategory[category];
+                const percentage = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+                html += `
+                    <div class="bar-item">
+                        <span class="bar-label">${category}:</span>
+                        <div class="bar-fill bg-red-500" style="width: ${percentage.toFixed(1)}%;"></div>
+                        <span class="bar-value">€${amount.toFixed(2)}</span>
+                    </div>`;
+            });
+            html += '</div>';
+            categoryAnalysisContent.innerHTML = html;
+            categoryAnalysisModal.style.display = 'flex';
+        };
+
+        const showMonthlyAnalysis = () => {
+            if (!monthlyAnalysisModal || !monthlyAnalysisContentElement) return;
+            if (allExpenses.length === 0) { 
+                monthlyAnalysisContentElement.innerHTML = "<p class='text-center text-gray-600'>No hay gastos para analizar mensualmente.</p>"; 
+                monthlyAnalysisModal.style.display = 'flex'; return; 
+            }
+
+            const expensesByMonth = {};
+            allExpenses.forEach(exp => {
+                if (!exp.date) return;
+                const yearMonth = exp.date.slice(0, 7); // YYYY-MM
+                expensesByMonth[yearMonth] = (expensesByMonth[yearMonth] || 0) + (parseFloat(exp.amount) || 0);
+            });
+
+            const sortedMonths = Object.keys(expensesByMonth).sort();
+            const maxAmount = Math.max(0, ...Object.values(expensesByMonth));
+
+            let html = '<h3 class="text-xl font-semibold mb-4 text-center text-indigo-700">Gastos por Mes</h3>';
+            html += '<div class="bar-chart-container">';
+            sortedMonths.forEach(month => {
+                const amount = expensesByMonth[month];
+                const percentage = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+                html += `
+                    <div class="bar-item">
+                        <span class="bar-label">${month}:</span>
+                        <div class="bar-fill bg-red-500" style="width: ${percentage.toFixed(1)}%;"></div>
+                        <span class="bar-value">€${amount.toFixed(2)}</span>
+                    </div>`;
+            });
+            html += '</div>';
+            monthlyAnalysisContentElement.innerHTML = html;
+            monthlyAnalysisModal.style.display = 'flex';
+        };
+        
+        // --- Tab Switching ---
+        const switchMainTab = (activeTabId) => {
+            const tabs = { transactions: transactionsSection, projects: projectsSection, budgets: budgetsSection };
+            const buttons = { transactions: tabTransactions, projects: tabProjects, budgets: tabBudgets };
+            for (const id in tabs) {
+                if (!tabs[id] || !buttons[id]) continue; // Skip if element doesn't exist
+                const isActive = id === activeTabId;
+                tabs[id].classList.toggle('hidden', !isActive);
+                buttons[id].classList.toggle('bg-indigo-600', isActive);
+                buttons[id].classList.toggle('text-white', isActive);
+                buttons[id].classList.toggle('bg-gray-200', !isActive);
+                buttons[id].classList.toggle('text-gray-700', !isActive);
+            }
+        };
+
+        const switchSubTab = (activeSubTabId) => {
+            const contents = { expenses: expenseContent, income: incomeContent };
+            const buttons = { expenses: subTabExpenses, income: subTabIncome };
+            for (const id in contents) {
+                if (!contents[id] || !buttons[id]) continue;
+                const isActive = id === activeSubTabId;
+                contents[id].classList.toggle('hidden', !isActive);
+                buttons[id].classList.toggle('bg-indigo-600', isActive);
+                buttons[id].classList.toggle('text-white', isActive);
+                buttons[id].classList.toggle('bg-gray-200', !isActive);
+                buttons[id].classList.toggle('text-gray-700', !isActive);
+            }
+        };
+        
+        // --- Edit Modal Population ---
+        async function openEditModal(itemId, itemType) {
+            if (!currentUserId || !editModal || !editForm) return;
+            try {
+                const docRef = getDocumentRef(itemType, itemId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const itemData = docSnap.data();
+                    editIdInput.value = itemId;
+                    editTypeInput.value = itemType;
+                    editModalTitle.textContent = `Editar ${itemType.slice(0, -1)}`; // e.g. Editar Gasto
+
+                    // Show all fields by default, then hide/adjust
+                    [editDescriptionContainer, editAmountContainer, editDateContainer, editCategoryContainer, editFrequencyContainer, editProjectContainer].forEach(el => el.style.display = 'block');
+                    editCategorySelect.innerHTML = ''; // Clear previous options
+                    
+                    if (itemType === 'expenses' || itemType === 'incomes') {
+                        editDescriptionInput.value = itemData.description || '';
+                        editAmountInput.value = (parseFloat(itemData.amount) || 0).toString();
+                        editDateInput.value = itemData.date || '';
+
+                        const categoryOptionsSource = itemType === 'expenses' ? expenseCategorySelect : incomeCategorySelect;
+                        Array.from(categoryOptionsSource.options).forEach(opt => {
+                            if(opt.value) editCategorySelect.add(new Option(opt.text, opt.value));
+                        });
+                        editCategorySelect.value = itemData.category || '';
+                        editFrequencySelect.value = itemData.frequency || 'Momentáneo';
+                        populateProjectSelects(); // Ensure editProjectSelect is populated
+                        editProjectSelect.value = itemData.project || "";
+                    } else if (itemType === 'projects') {
+                        editDescriptionInput.value = itemData.name || '';
+                        editAmountInput.value = (parseFloat(itemData.budget) || 0).toString();
+                        editModalTitle.textContent = "Editar Proyecto/Propiedad";
+                        // Hide non-project fields
+                        [editDateContainer, editCategoryContainer, editFrequencyContainer, editProjectContainer].forEach(el => el.style.display = 'none');
+                    } else if (itemType === 'budgets') {
+                        // Budgets are identified by category, amount is editable
+                        editModalTitle.textContent = "Editar Presupuesto";
+                        // Populate category select with expense categories
+                        Array.from(expenseCategorySelect.options).forEach(opt => {
+                             if(opt.value) editCategorySelect.add(new Option(opt.text, opt.value));
+                        });
+                        editCategorySelect.value = itemData.category || '';
+                        editCategorySelect.disabled = true; // Category of budget is not editable, only amount
+                        editAmountInput.value = (parseFloat(itemData.amount) || 0).toString();
+                        // Hide non-budget fields
+                        [editDescriptionContainer, editDateContainer, editFrequencyContainer, editProjectContainer].forEach(el => el.style.display = 'none');
+                    }
+                    editModal.style.display = 'flex';
+                } else {
+                    console.error("Documento no encontrado para editar."); alert("No se pudo cargar el ítem para editar.");
+                }
+            } catch (error) {
+                console.error("Error al abrir modal de edición: ", error); alert("Error al cargar datos para edición.");
+            }
+        }
+
+
+        // --- Event Listeners Attachment ---
+        const attachEventListeners = () => {
+            if (!logoutBtn) { // Guard to prevent errors if called too early or after logout
+                console.warn("Main app DOM not fully initialized for event listeners.");
+                return;
+            }
+            // Remove previous listeners to avoid duplicates if re-attaching (though ideally only attach once)
+            // This is a simple way; for complex apps, manage listener removal more carefully.
+            const newLogoutBtn = logoutBtn.cloneNode(true);
+            logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
+            logoutBtn = newLogoutBtn; // Reassign to the new cloned button
+            logoutBtn.addEventListener('click', async () => {
+                try { await signOut(auth); console.log("Sesión cerrada."); } 
+                catch (error) { console.error("Error al cerrar sesión:", error); }
+            });
+
+            // Main Tabs
+            tabTransactions.addEventListener('click', () => switchMainTab('transactions'));
+            tabProjects.addEventListener('click', () => switchMainTab('projects'));
+            tabBudgets.addEventListener('click', () => switchMainTab('budgets'));
+
+            // Sub-tabs
+            subTabExpenses.addEventListener('click', () => switchSubTab('expenses'));
+            subTabIncome.addEventListener('click', () => switchSubTab('income'));
+
+            // Forms
+            expenseForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (await addDocument('expenses', { 
+                    description: expenseDescriptionInput.value, 
+                    amount: parseFloat(expenseAmountInput.value), 
+                    date: expenseDateInput.value, 
+                    category: expenseCategorySelect.value, 
+                    frequency: expenseFrequencySelect.value, 
+                    project: expenseProjectSelect.value || null 
+                })) expenseForm.reset();
+            });
+            incomeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (await addDocument('incomes', { 
+                    description: incomeDescriptionInput.value, 
+                    amount: parseFloat(incomeAmountInput.value), 
+                    date: incomeDateInput.value, 
+                    category: incomeCategorySelect.value, 
+                    frequency: incomeFrequencySelect.value, 
+                    project: incomeProjectSelect.value || null 
+                })) incomeForm.reset();
+            });
+            projectForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (projectNameInput.value && await addDocument('projects', { 
+                    name: projectNameInput.value, 
+                    budget: parseFloat(projectBudgetInput.value) || 0 
+                })) projectForm.reset();
+            });
+            budgetForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const category = budgetCategorySelectInput.value;
+                const amount = parseFloat(budgetAmountInput.value);
+                if (category && !isNaN(amount)) {
+                    const existingBudget = allBudgets.find(b => b.category === category);
+                    if (existingBudget) {
+                        if (await updateDocumentInDb('budgets', existingBudget.id, { amount })) budgetForm.reset();
+                    } else {
+                        if (await addDocument('budgets', { category, amount })) budgetForm.reset();
+                    }
+                }
+            });
+            
+            // Filters
+            [filterExpenseCategory, filterExpenseDate, searchExpense].forEach(el => el.addEventListener('input', () => renderExpenses(allExpenses)));
+            [filterIncomeCategory, filterIncomeDate, searchIncome].forEach(el => el.addEventListener('input', () => renderIncomes(allIncomes)));
+
+
+            // Modals
+            closeConfirmationModal.addEventListener('click', () => { confirmationModal.style.display = 'none'; itemToDelete = null; });
+            cancelDeleteBtn.addEventListener('click', () => { confirmationModal.style.display = 'none'; itemToDelete = null; });
+            confirmDeleteBtn.addEventListener('click', async () => {
+                if (itemToDelete) {
+                    await deleteDocumentFromDb(itemToDelete.type, itemToDelete.id);
+                    confirmationModal.style.display = 'none';
+                    itemToDelete = null;
+                }
+            });
+
+            closeEditModal.addEventListener('click', () => { editModal.style.display = 'none'; editCategorySelect.disabled = false; });
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = editIdInput.value;
+                const type = editTypeInput.value;
+                let updatedData = {};
+
+                if (type === 'expenses' || type === 'incomes') {
+                    updatedData = {
+                        description: editDescriptionInput.value,
+                        amount: parseFloat(editAmountInput.value),
+                        date: editDateInput.value,
+                        category: editCategorySelect.value,
+                        frequency: editFrequencySelect.value,
+                        project: editProjectSelect.value || null
+                    };
+                } else if (type === 'projects') {
+                    updatedData = { name: editDescriptionInput.value, budget: parseFloat(editAmountInput.value) || 0 };
+                } else if (type === 'budgets') {
+                    updatedData = { category: editCategorySelect.value, amount: parseFloat(editAmountInput.value) };
+                }
+                
+                if (await updateDocumentInDb(type, id, updatedData)) {
+                    editModal.style.display = 'none';
+                    editCategorySelect.disabled = false; // Re-enable for next edit
+                }
+            });
+
+            // Analysis Modal Buttons
+            document.getElementById('showCategoryAnalysisBtn').addEventListener('click', showCategoryAnalysis);
+            closeCategoryAnalysisModal.addEventListener('click', () => { categoryAnalysisModal.style.display = 'none'; });
+            closeCategoryAnalysisModalBtn.addEventListener('click', () => { categoryAnalysisModal.style.display = 'none'; });
+
+            document.getElementById('showMonthlyAnalysisBtn').addEventListener('click', showMonthlyAnalysis);
+            closeMonthlyAnalysisModal.addEventListener('click', () => { monthlyAnalysisModal.style.display = 'none'; });
+            closeMonthlyAnalysisModalBtn.addEventListener('click', () => { monthlyAnalysisModal.style.display = 'none'; });
+            
+            // Delegated event listener for delete and edit buttons within lists
+            mainAppContent.addEventListener('click', (e) => {
+                const target = e.target.closest('button'); // Get the button element if a child was clicked
+                if (!target) return;
+
+                if (target.classList.contains('delete-btn')) {
+                    const id = target.dataset.id;
+                    const type = target.dataset.type;
+                    if (id && type) {
+                        itemToDelete = { id, type };
+                        confirmationModal.style.display = 'flex';
+                    }
+                } else if (target.classList.contains('edit-btn')) {
+                    const id = target.dataset.id;
+                    const type = target.dataset.type;
+                    if (id && type) {
+                        openEditModal(id, type);
+                    }
+                }
+            });
+        };
+
+        // Initialize Firebase on window load
+        window.onload = initializeFirebase;
     </script>
 </body>
 </html>
