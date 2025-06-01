@@ -167,9 +167,6 @@
                 <button type="submit" id="authSubmitBtn" class="btn-primary w-full">Iniciar Sesión</button>
             </form>
             <p id="authMessage" class="text-center text-sm text-red-500 mt-4 hidden"></p>
-            <div class="text-center mt-4">
-                <button id="toggleAuthModeBtn" class="text-indigo-600 hover:text-indigo-800 text-sm">¿No tienes cuenta? Regístrate aquí</button>
-            </div>
         </div>
     </div>
 
@@ -650,8 +647,21 @@
                 });
 
             } catch (error) {
-                console.error("Error initializing Firebase:", error);
-                authMessage.textContent = `Error de Firebase: ${error.message}`;
+                console.error("Auth error:", error.code, error.message);
+                let userFriendlyMessage = "Ha ocurrido un error. Por favor, inténtalo de nuevo.";
+                if (error.code === 'auth/invalid-email') {
+                    userFriendlyMessage = "Formato de email inválido.";
+                } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') { // Añadido auth/invalid-credential
+                    userFriendlyMessage = "Email o contraseña incorrectos. Por favor, verifica tus credenciales.";
+                } else if (error.code === 'auth/email-already-in-use') {
+                    userFriendlyMessage = "Este email ya está registrado. Intenta iniciar sesión.";
+                } else if (error.code === 'auth/weak-password') {
+                    userFriendlyMessage = "La contraseña debe tener al menos 6 caracteres.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    userFriendlyMessage = "Demasiados intentos fallidos. Por favor, inténtalo más tarde o restablece tu contraseña.";
+                }
+                
+                authMessage.textContent = userFriendlyMessage;
                 authMessage.classList.remove('hidden');
             }
         };
@@ -776,12 +786,35 @@
         };
 
         // --- Authentication Functions ---
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = authEmailInput.value;
-            const password = authPasswordInput.value;
-            authMessage.classList.add('hidden'); 
+authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = authEmailInput.value;
+    const password = authPasswordInput.value;
+    authMessage.classList.add('hidden'); 
 
+    // Como isLoginMode siempre será true, solo se ejecutará signInWithEmailAndPassword
+    if (isLoginMode) { 
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            // No necesitas más el 'else' para registrar
+        } catch (error) {
+            console.error("Auth error:", error.code, error.message);
+            let userFriendlyMessage = "Ha ocurrido un error. Por favor, inténtalo de nuevo.";
+            if (error.code === 'auth/invalid-email') {
+                userFriendlyMessage = "Formato de email inválido.";
+            } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                userFriendlyMessage = "Email o contraseña incorrectos. Por favor, verifica tus credenciales.";
+            } else if (error.code === 'auth/too-many-requests') {
+                userFriendlyMessage = "Demasiados intentos fallidos. Por favor, inténtalo más tarde o restablece tu contraseña.";
+            }
+            // Ya no necesitas manejar 'auth/email-already-in-use' o 'auth/weak-password' si el registro está deshabilitado
+
+            authMessage.textContent = userFriendlyMessage;
+            authMessage.classList.remove('hidden');
+        }
+    } 
+    // El bloque 'else' para createUserWithEmailAndPassword ya no es necesario si isLoginMode es siempre true.
+});
             try {
                 if (isLoginMode) {
                     await signInWithEmailAndPassword(auth, email, password);
@@ -806,15 +839,6 @@
                 authMessage.textContent = userFriendlyMessage;
                 authMessage.classList.remove('hidden');
             }
-        });
-
-        toggleAuthModeBtn.addEventListener('click', () => {
-            isLoginMode = !isLoginMode;
-            authTitle.textContent = isLoginMode ? "Iniciar Sesión" : "Registrarse";
-            authSubmitBtn.textContent = isLoginMode ? "Iniciar Sesión" : "Registrarse";
-            toggleAuthModeBtn.textContent = isLoginMode ? "¿No tienes cuenta? Regístrate aquí" : "¿Ya tienes cuenta? Inicia sesión aquí";
-            authMessage.classList.add('hidden');
-            authForm.reset();
         });
         
         // --- Generic Data Handling Functions (Firestore) ---
