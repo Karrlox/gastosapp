@@ -11,12 +11,12 @@ import {
 
 // ¡¡¡REEMPLAZA ESTO CON TU CONFIGURACIÓN REAL DE FIREBASE!!!
 const firebaseConfig = {
-    apiKey: "AIzaSyCDBg8qM50VpW59IBQ94ZhLceq2sCwf1rc",
-    authDomain: "gastosinmobiliaria.firebaseapp.com",
-    projectId: "gastosinmobiliaria",
-    storageBucket: "gastosinmobiliaria.firebasestorage.app",
-    messagingSenderId: "690296047200",
-    appId: "1:690296047200:web:b37efc46d3ae0dfe03e505",
+    apiKey: "TU_FIREBASE_API_KEY_AQUI",
+    authDomain: "TU_AUTH_DOMAIN_AQUI",
+    projectId: "TU_PROJECT_ID_AQUI",
+    storageBucket: "TU_PROJECT_ID_AQUI.firebasestorage.app",
+    messagingSenderId: "TU_MESSAGING_SENDER_ID_AQUI",
+    appId: "TU_APP_ID_AQUI",
 };
 
 // Global variables for Firebase
@@ -597,4 +597,5 @@ const attachEventListeners = () => {
 };
 
 // Initialize Firebase on window load
+
 window.onload = initializeFirebase;
